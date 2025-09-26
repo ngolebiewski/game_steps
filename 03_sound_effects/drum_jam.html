@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chiptune Drum Loop Demo</title>
+</head>
+<body style="background:black;color:lime;font-family:monospace;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;">
+  <h1>Chiptune Drum Loop</h1>
+  <button id="start">▶ Start Loop</button>
+  <button id="stop">⏹ Stop Loop</button>
+
+<script>
+let audioCtx;
+function getCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+
+// --- Kick (808-style) ---
+function playKickAt(time) {
+  const ctx = getCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = "sine"; // deeper, smoother than square
+  osc.frequency.setValueAtTime(80, time);
+  osc.frequency.exponentialRampToValueAtTime(40, time + 0.5);
+
+  gain.gain.setValueAtTime(1.0, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.6);
+
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(time);
+  osc.stop(time + 0.6);
+}
+
+// --- Dirty 80s Snare ---
+function play80sSnareAt(time) {
+  const ctx = getCtx();
+  const bufferSize = ctx.sampleRate * 0.5; // 500ms
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+
+  // White noise
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize); // fade out
+  }
+
+  const noise = ctx.createBufferSource();
+  noise.buffer = buffer;
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.7, time);
+  gain.gain.exponentialRampToValueAtTime(0.01, time + 0.4);
+
+  noise.connect(gain).connect(ctx.destination);
+  noise.start(time);
+  noise.stop(time + 0.5);
+
+  // Add body: short square hit
+  const osc = ctx.createOscillator();
+  const oscGain = ctx.createGain();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(180, time);
+  oscGain.gain.setValueAtTime(0.4, time);
+  oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+  osc.connect(oscGain).connect(ctx.destination);
+  osc.start(time);
+  osc.stop(time + 0.2);
+}
+
+// Industiral Snare
+
+function playSnareAt(time) {
+  const ctx = getCtx();
+
+  // --- Noise source ---
+  const bufferSize = ctx.sampleRate * 0.8; // ~800ms
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+
+  // White noise
+  for (let i = 0; i < bufferSize; i++) {
+    // Clip the noise -> distortion/harshness
+    let n = (Math.random() * 2 - 1) * 2.0;
+    data[i] = Math.max(-0.7, Math.min(0.7, n)); // soft clip
+  }
+
+  const noise = ctx.createBufferSource();
+  noise.buffer = buffer;
+
+  // --- Bandpass filter (metallic edge) ---
+  const bpFilter = ctx.createBiquadFilter();
+  bpFilter.type = "bandpass";
+  bpFilter.frequency.setValueAtTime(2500, time); // metallic range
+  bpFilter.Q.value = 2.5;
+
+  // --- Highpass filter (cut mud, keep brightness) ---
+  const hpFilter = ctx.createBiquadFilter();
+  hpFilter.type = "highpass";
+  hpFilter.frequency.setValueAtTime(1000, time);
+
+  // --- Envelope ---
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.9, time);
+  gain.gain.exponentialRampToValueAtTime(0.01, time + 0.7);
+
+  // Connect chain
+  noise.connect(bpFilter).connect(hpFilter).connect(gain).connect(ctx.destination);
+
+  noise.start(time);
+  noise.stop(time + 0.8);
+
+  // --- Add body "thwack" ---
+  const osc = ctx.createOscillator();
+  const oscGain = ctx.createGain();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(200, time);
+  oscGain.gain.setValueAtTime(0.3, time);
+  oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
+  osc.connect(oscGain).connect(ctx.destination);
+  osc.start(time);
+  osc.stop(time + 0.15);
+}
+
+// --- Hi-Hat ---
+function playHiHatAt(time) {
+  const ctx = getCtx();
+  const bufferSize = ctx.sampleRate * 0.1; // 100ms
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+
+  // White noise
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * 0.5;
+  }
+
+  const noise = ctx.createBufferSource();
+  noise.buffer = buffer;
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.4, time);
+  gain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+
+  noise.connect(gain).connect(ctx.destination);
+  noise.start(time);
+  noise.stop(time + 0.1);
+}
+
+// --- Sequencer with Scheduler ---
+let currentNote = 0;
+let nextNoteTime = 0.0;
+let tempo = 100; // BPM
+let isPlaying = false;
+let schedulerId;
+
+function nextNote() {
+  const secondsPerBeat = 60.0 / tempo;
+  const eighthNoteTime = secondsPerBeat / 2;
+  nextNoteTime += eighthNoteTime;
+  currentNote = (currentNote + 1) % 8;
+}
+
+function scheduleNote(noteIndex, time) {
+  if (noteIndex % 4 === 0) playKickAt(time);   // beats 1 + 3
+  if (noteIndex % 4 === 2) playSnareAt(time);  // beats 2 + 4
+  playHiHatAt(time);                           // every eighth
+}
+
+function scheduler() {
+  const ctx = getCtx();
+  while (nextNoteTime < ctx.currentTime + 0.2) { // schedule 200ms ahead
+    scheduleNote(currentNote, nextNoteTime);
+    nextNote();
+  }
+  schedulerId = requestAnimationFrame(scheduler);
+}
+
+function startChiptuneLoop(bpm = 100) {
+  if (isPlaying) return;
+  tempo = bpm;
+  currentNote = 0;
+  nextNoteTime = getCtx().currentTime + 0.05;
+  isPlaying = true;
+  scheduler();
+}
+
+function stopChiptuneLoop() {
+  isPlaying = false;
+  cancelAnimationFrame(schedulerId);
+}
+
+// --- UI ---
+document.getElementById("start").addEventListener("click", () => startChiptuneLoop(90));
+document.getElementById("stop").addEventListener("click", stopChiptuneLoop);
+</script>
+</body>
+</html>
