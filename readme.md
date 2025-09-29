@@ -46,7 +46,18 @@ Goal: Games *NEED* sound! Add in soundeffects and some music, all generated with
 
 ## 04_player_class_refactor
 
-Goal: We need opponents (monsters, villains, you name it). We'll need to track location, health, etc -- so let's pull the player into a character/player class, and extend that to a monster class. Let's break out some of the other classes too, because this code is getting LONG
+Goal: We need opponents (monsters, villains, you name it). We'll need to track location, health, etc -- so let's pull the player into a character/player class, and extend that to a monster class. Let's break out some of the other classes too, because this code is getting LONG.
+
+- ok, added in Classes as independent js files for:
+    - Button
+    - GameView (does all the canvas, buffer, and context drawing)
+    - globals (on the fence about this. Should probably be its own class...)
+    - Level
+    - MovementControler (decouple the controls from the level functions/sprites -- and add in touch controls (to be tested))
+    - SceneManager (switch between levels)
+    - Sprite (gets the sprite for you)
+
+- now this is a lot more manageable
 
 
-## GAMEPLAN....
+## GAMEPLAN...

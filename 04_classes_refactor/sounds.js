@@ -134,7 +134,7 @@ function playDrum(isSnare, time) {
     const gain = ctx.createGain();
     osc.type = "square";
     osc.frequency.setValueAtTime(60, time);
-    gain.gain.setValueAtTime(0.02, time);
+    gain.gain.setValueAtTime(0.05, time);
     osc.connect(gain).connect(ctx.destination);
     osc.start(time);
     osc.stop(time + 0.15);
