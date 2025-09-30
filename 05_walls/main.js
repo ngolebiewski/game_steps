@@ -141,9 +141,9 @@ sceneOne.onUpdate = () => {
   }
 
   function isBlocked(x, y) {
-    const left = x+2;
+    const left = x+4;
     const right = x + spriteSize - 4;
-    const top = y+2;
+    const top = y+4;
     const bottom = y + spriteSize - 4;
 
     return (
