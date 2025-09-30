@@ -34,7 +34,7 @@ const cross = new Sprite("cross", tilesheet, 4, 5, TILE_SIZE, SCALE);
 const wizardMover = new MovementController(1.2 * SCALE);
 
 // --- Scenes ---
-const titleScene = new Level("title", "GAME_EXPERIMENT_03");
+const titleScene = new Level("title", "GAME_EXPERIMENT_04");
 const sceneOne = new Level("level_01", "MEET YOUR FATE");
 const endScene = new Level("end", "YOU WIN, GAME OVER");
 

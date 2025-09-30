@@ -59,5 +59,12 @@ Goal: We need opponents (monsters, villains, you name it). We'll need to track l
 
 - now this is a lot more manageable
 
+## 05 Walls
+
+Goal: We need walls! It is way to easy to get to the cross. So, lets add in a maze. I feel like this will be Pac-Man-ish! But, what about autogenerating the course each time. Procedural dungeons...
+
+Eventually lets have a tilemap, but for now, with 1 wall tile, lets see what we can make.
+
+
 
 ## GAMEPLAN...
