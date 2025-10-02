@@ -65,6 +65,9 @@ Goal: We need walls! It is way to easy to get to the cross. So, lets add in a ma
 
 Eventually lets have a tilemap, but for now, with 1 wall tile, lets see what we can make.
 
+## Current Version
+
+Want to work from a current version, so it is easier to see what has changed. When a new 'level' has been reached, i.e. 06 Expand walls add camera, save it as that in another folder to have a playable record of each iteration.
 
 
 ## GAMEPLAN...
