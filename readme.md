@@ -77,6 +77,10 @@ Want to work from a current version, so it is easier to see what has changed. Wh
 
 - Moved the Global variables into a Global class, so managed slightly better.
 
+## 07 Monster Time
+
+This game is boring without an adversary. Let's get some monsters in the maze. More collission detection, health, death state...
+
 ## GAMEPLAN...
 - IDEA: Make candles be an object to find. Less candles, less light and the view distance radius decreases. Always with a bit of flicker, maybe cool flame particles. Out of light? Search around in the darkness for a few seconds then...GAME OVER! 
 
