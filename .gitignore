@@ -1,3 +1,6 @@
 .git
 .DS*
 .env
+
+# ASEPRITE FILES, ETC.
+/artwork

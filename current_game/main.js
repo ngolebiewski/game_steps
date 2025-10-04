@@ -1,57 +1,40 @@
 import { getRandomIntBetween, drawText } from './util.js';
-import { playCross, playBonk, playStart, startSong } from './sounds.js';
+import { playCross, playStart, startSong } from './sounds.js';
 import Level from './level.js';
 import SceneManager from './sceneManager.js';
 import GameView from './gameView.js';
 import { g } from './globals.js';
 import MovementController from './movementController.js';
 import Sprite from './sprite.js';
+import Camera from './camera.js';
+import MazeGenerator from './mazeGenerator.js';
 
 // --- Setup GameView ---
-const gameView = new GameView("game"); 
+const gameView = new GameView("game");
 
 // --- Scene Manager ---
 const sceneManager = new SceneManager();
 
-// --- Globals ---
-const TILE_SIZE = 16;
-const SCALE = 2;
-
 // Base maze size (relative to screen)
-const BASE_COLS = Math.floor(g.BUFFER_WIDTH / (TILE_SIZE * SCALE));
-const BASE_ROWS = Math.floor(g.BUFFER_HEIGHT / (TILE_SIZE * SCALE));
+const BASE_COLS = Math.floor(g.BUFFER_WIDTH / (g.TILE_SIZE * g.SCALE));
+const BASE_ROWS = Math.floor(g.BUFFER_HEIGHT / (g.TILE_SIZE * g.SCALE));
 
 let currentLevel = 1;
 let ROWS, COLS;
-let maze = [];
 
 // --- Camera ---
-let cameraX = 0;
-let cameraY = 0;
-
-function updateCamera() {
-  // Center camera on wizard
-  cameraX = wizard.x - g.BUFFER_WIDTH / 2 + TILE_SIZE;
-  cameraY = wizard.y - g.BUFFER_HEIGHT / 2 + TILE_SIZE;
-
-  // Clamp camera inside maze bounds
-  const maxX = COLS * TILE_SIZE * SCALE - g.BUFFER_WIDTH;
-  const maxY = ROWS * TILE_SIZE * SCALE - g.BUFFER_HEIGHT;
-
-  cameraX = Math.max(0, Math.min(cameraX, maxX));
-  cameraY = Math.max(0, Math.min(cameraY, maxY));
-}
+const camera = new Camera();
 
 // --- Characters ---
 const tilesheet = new Image();
 tilesheet.src = "tilemap_packed.png";
 
-const wizard = new Sprite("wizard", tilesheet, 0, 7, TILE_SIZE, SCALE);
-const cross = new Sprite("cross", tilesheet, 4, 5, TILE_SIZE, SCALE);
-const wall = new Sprite("wall", tilesheet, 4, 3, TILE_SIZE, SCALE);
+const wizard = new Sprite("wizard", tilesheet, 0, 7, g.TILE_SIZE, g.SCALE);
+const cross = new Sprite("cross", tilesheet, 4, 5, g.TILE_SIZE, g.SCALE);
+const wall = new Sprite("wall", tilesheet, 4, 3, g.TILE_SIZE, g.SCALE);
 
 // Movement controller (speed will be adjusted each level)
-let wizardMover = new MovementController(1.2 * SCALE);
+let wizardMover = new MovementController(1.2 * g.SCALE);
 
 // --- Scenes ---
 const titleScene = new Level("title", "The Endless Maze");
@@ -59,73 +42,7 @@ const sceneOne = new Level("level_01", "");
 const endScene = new Level("end", "YOU WIN, GAME OVER");
 
 // --- Maze Generator ---
-function generateMaze(rows, cols) {
-  let grid = Array.from({ length: rows }, () => Array(cols).fill(1));
-
-  function carve(x, y) {
-    grid[y][x] = 0;
-    const directions = [
-      [0, -2], [0, 2], [-2, 0], [2, 0]
-    ].sort(() => Math.random() - 0.5);
-
-    for (const [dx, dy] of directions) {
-      const nx = x + dx;
-      const ny = y + dy;
-      if (
-        ny > 0 && ny < rows - 1 &&
-        nx > 0 && nx < cols - 1 &&
-        grid[ny][nx] === 1
-      ) {
-        grid[y + dy / 2][x + dx / 2] = 0;
-        carve(nx, ny);
-      }
-    }
-  }
-
-  carve(1, 1);
-
-  // Borders = walls
-  for (let y = 0; y < rows; y++) {
-    grid[y][0] = grid[y][cols - 1] = 1;
-  }
-  for (let x = 0; x < cols; x++) {
-    grid[0][x] = grid[rows - 1][x] = 1;
-  }
-
-  return grid;
-}
-
-// --- BFS flood fill: find reachable cells ---
-function getReachableCells(startRow, startCol) {
-  const visited = Array.from({ length: ROWS }, () => Array(COLS).fill(false));
-  const queue = [[startRow, startCol]];
-  visited[startRow][startCol] = true;
-  const reachable = [];
-
-  while (queue.length > 0) {
-    const [r, c] = queue.shift();
-    reachable.push([r, c]);
-
-    const neighbors = [
-      [r - 1, c], [r + 1, c],
-      [r, c - 1], [r, c + 1]
-    ];
-
-    for (const [nr, nc] of neighbors) {
-      if (
-        nr >= 0 && nr < ROWS &&
-        nc >= 0 && nc < COLS &&
-        !visited[nr][nc] &&
-        maze[nr][nc] === 0
-      ) {
-        visited[nr][nc] = true;
-        queue.push([nr, nc]);
-      }
-    }
-  }
-
-  return reachable;
-}
+const mazeGen = new MazeGenerator();
 
 // --- Scene start/reset logic ---
 sceneOne.start = () => {
@@ -134,10 +51,10 @@ sceneOne.start = () => {
   ROWS = Math.floor(BASE_ROWS * growthFactor);
   COLS = Math.floor(BASE_COLS * growthFactor);
 
-  maze = generateMaze(ROWS, COLS);
+  mazeGen.generate(ROWS, COLS);
 
   // Speed grows by +5% each level
-  const baseSpeed = 1.2 * SCALE;
+  const baseSpeed = 1.2 * g.SCALE;
   const speedFactor = 1 + (currentLevel - 1) * 0.05;
   wizardMover = new MovementController(baseSpeed * speedFactor);
 
@@ -146,16 +63,16 @@ sceneOne.start = () => {
   do {
     startRow = getRandomIntBetween(1, ROWS - 2);
     startCol = getRandomIntBetween(1, COLS - 2);
-  } while (maze[startRow][startCol] !== 0);
+  } while (mazeGen.maze[startRow][startCol] !== 0);
 
-  wizard.setPosition(startCol * TILE_SIZE * SCALE, startRow * TILE_SIZE * SCALE);
+  wizard.setPosition(startCol * g.TILE_SIZE * g.SCALE, startRow * g.TILE_SIZE * g.SCALE);
 
   // Place cross in reachable spot
-  const reachable = getReachableCells(startRow, startCol);
+  const reachable = mazeGen.getReachableCells(startRow, startCol);
   const [crossRow, crossCol] = reachable[Math.floor(Math.random() * reachable.length)];
-  cross.setPosition(crossCol * TILE_SIZE * SCALE, crossRow * TILE_SIZE * SCALE);
+  cross.setPosition(crossCol * g.TILE_SIZE * g.SCALE, crossRow * g.TILE_SIZE * g.SCALE);
 
-  updateCamera();
+  camera.centerOn(wizard, COLS, ROWS);
 };
 
 // --- Scene update ---
@@ -164,18 +81,18 @@ sceneOne.onUpdate = () => {
   let newX = wizard.x + move.dx;
   let newY = wizard.y + move.dy;
 
-  const spriteSize = TILE_SIZE * SCALE;
+  const spriteSize = g.TILE_SIZE * g.SCALE;
 
   function collides(x, y) {
     const col = Math.floor(x / spriteSize);
     const row = Math.floor(y / spriteSize);
-    return maze[row] && maze[row][col] === 1;
+    return mazeGen.maze[row] && mazeGen.maze[row][col] === 1;
   }
 
   function isBlocked(x, y) {
-    const left = x+4;
+    const left = x + 4;
     const right = x + spriteSize - 4;
-    const top = y+4;
+    const top = y + 4;
     const bottom = y + spriteSize - 4;
 
     return (
@@ -196,13 +113,15 @@ sceneOne.onUpdate = () => {
     wizard.y = newY;
   }
 
-  // Update camera
-  updateCamera();
+  // Update camera to follow wizard
+  camera.centerOn(wizard, COLS, ROWS);
 
   // Collision with cross
   if (wizard.collidesWith(cross)) {
     playCross();
-    currentLevel++;  // bigger + faster next time
+    g.deathsCollected++;
+    currentLevel++; // bigger + faster next time
+    console.log('Current Level: ', currentLevel, '✟ collected:', g.deathsCollected);
     sceneManager.changeScene(sceneOne);
     sceneOne.start();
   }
@@ -213,21 +132,23 @@ sceneOne.onDraw = () => {
   // Draw maze with camera offset
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
-      if (maze[row][col] === 1) {
-        wall.setPosition(col * TILE_SIZE * SCALE - cameraX, row * TILE_SIZE * SCALE - cameraY);
+      if (mazeGen.maze[row][col] === 1) {
+        wall.setPosition(col * g.TILE_SIZE * g.SCALE, row * g.TILE_SIZE * g.SCALE);
+        camera.applyTo(wall);
         wall.draw();
+        camera.reset(wall);
       }
     }
   }
 
   // Draw characters (offset by camera)
-  cross.setPosition(cross.x - cameraX, cross.y - cameraY);
+  camera.applyTo(cross);
   cross.draw();
-  cross.setPosition(cross.x + cameraX, cross.y + cameraY);
+  camera.reset(cross);
 
-  wizard.setPosition(wizard.x - cameraX, wizard.y - cameraY);
+  camera.applyTo(wizard);
   wizard.draw();
-  wizard.setPosition(wizard.x + cameraX, wizard.y + cameraY);
+  camera.reset(wizard);
 };
 
 endScene.onDraw = () => {
@@ -267,7 +188,6 @@ endScene.buttonConfig = {
   height: 50,
   onClick: () => {
     playStart();
-    g.deathsCollected++;
     sceneManager.changeScene(sceneOne);
     sceneOne.start();
   },
@@ -287,6 +207,7 @@ function gameLoop() {
   gameView.drawBufferToScreen();
   requestAnimationFrame(gameLoop);
 }
+
 // --- Quit shortcut ---
 window.addEventListener("keydown", (e) => {
   if (e.key.toLowerCase() === "q") {

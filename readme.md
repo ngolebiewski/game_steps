@@ -65,9 +65,21 @@ Goal: We need walls! It is way to easy to get to the cross. So, lets add in a ma
 
 Eventually lets have a tilemap, but for now, with 1 wall tile, lets see what we can make.
 
-## Current Version
+## 06 Endless Maze
 
 Want to work from a current version, so it is easier to see what has changed. When a new 'level' has been reached, i.e. 06 Expand walls add camera, save it as that in another folder to have a playable record of each iteration.
 
+- Maze generation, Breadth First Search (BFS) out in the wild!
+
+- moved out button config data to ui.js --> Could probably make a class, but may just drop that feature since it draws a regular font, and not a bitmap font --> UPDATE: didn't work, ignore since will end up dropping buttons.
+
+- Quick to implement, Longer to refactor into a mazeGenerator and Camera Class.
+
+- Moved the Global variables into a Global class, so managed slightly better.
 
 ## GAMEPLAN...
+- IDEA: Make candles be an object to find. Less candles, less light and the view distance radius decreases. Always with a bit of flicker, maybe cool flame particles. Out of light? Search around in the darkness for a few seconds then...GAME OVER! 
+
+*Kudos to my favorite game when I was 6: 'Cave of the Word Wizard'.*
+
+>It's getting darker...
