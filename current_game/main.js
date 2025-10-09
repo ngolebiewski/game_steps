@@ -53,6 +53,7 @@ sceneOne.start = () => {
 
   mazeGen.generate(ROWS, COLS);
 
+
   // Speed grows by +5% each level
   const baseSpeed = 1.2 * g.SCALE;
   const speedFactor = 1 + (currentLevel - 1) * 0.05;
@@ -64,6 +65,11 @@ sceneOne.start = () => {
     startRow = getRandomIntBetween(1, ROWS - 2);
     startCol = getRandomIntBetween(1, COLS - 2);
   } while (mazeGen.maze[startRow][startCol] !== 0);
+
+  console.log('maze array: ', mazeGen.maze)
+  
+  // Carves out chambers from the maze array.
+  if (currentLevel > 2) { mazeGen.makeRooms(currentLevel) }
 
   wizard.setPosition(startCol * g.TILE_SIZE * g.SCALE, startRow * g.TILE_SIZE * g.SCALE);
 

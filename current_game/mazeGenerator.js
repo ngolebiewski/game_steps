@@ -84,4 +84,51 @@ export default class MazeGenerator {
 
     return reachable;
   }
+  // method to cut rooms out of maze, because it will be more fun with chambers of secrets.
+  makeRooms(currentLevel) {
+
+    // TO DO: Random sizes for Rooms, make the max size grow as the level gets higher and the stages are bigger with more area.
+
+    // let's start with adding in a 2x3 room somewhere in bounds. then lets randomize it, and make more rooms with more levels, that sort of thing.
+
+
+    //hard code for now. make this more random after testing one box out
+    const boxes = [[2, 3], [3, 4], [6, 6], [10, 10]]
+    const numberRooms = Math.floor(Math.min(currentLevel / 3, boxes.length))
+    console.log('number rooms: ', numberRooms)
+
+    // this.maze is a 2d array and we want to skip the 1st and last rows and columns because those are walls.
+    // Where will the room go?
+    // Pick random number between 1 and 1 less than length minus width/height of room.
+    // Returns the upper left [x,y] for the box to be positioned in the maze
+    const getBoxUpperLeftCoordinate = (xWide, yTall) => {
+      const x = getRandomIntBetween(1, this.cols - 2 - xWide);
+      const y = getRandomIntBetween(1, this.rows - 2 - yTall);
+      return [x, y]
+    }
+
+    // This takes an array of the box's top left coordinates [x,y] and an array of the box dimensions [width,height]
+    // Then it replaces the coordinates of the 'room' with 0s in the maze array, thus creating an open room.
+    const carveBox = (origin, box) => {
+      const oX = origin[0]
+      const oY = origin[1]
+      const bX = box[0]
+      const bY = box[1]
+
+      for (let y = oY; y < oY + bY; y++) {
+        for (let x = oX; x < oX + bX; x++) {
+          this.maze[y][x] = 0;
+        }
+      }
+    }
+
+
+    for (let i = 0; i < numberRooms; i++) {
+      const box = boxes[i]
+      console.log(box)
+      const boxOrigin = getBoxUpperLeftCoordinate(box[0], box[1])
+      carveBox(boxOrigin, box)
+    }
+
+  }
 }

@@ -77,7 +77,7 @@ Want to work from a current version, so it is easier to see what has changed. Wh
 
 - Moved the Global variables into a Global class, so managed slightly better.
 
-## 07 Monster Time
+## 07 Monster Time 
 
 This game is boring without an adversary. Let's get some monsters in the maze. More collission detection, health, death state...
 
@@ -87,3 +87,8 @@ This game is boring without an adversary. Let's get some monsters in the maze. M
 *Kudos to my favorite game when I was 6: 'Cave of the Word Wizard'.*
 
 >It's getting darker...
+
+- Competitors. Not a hack and slash, but others racing to get the cross.
+- Room carver -> After level 3 randomly carve out 3x3 or 4x4 or 2x6 chambers/rooms on top of the maze grid.
+- At some level make a MAP feature. that will be a little pop up that can show the maze, or at least the location of the cross, that sort of thing. Very OG Zelda when you get a dungeon map
+- Intro scene where you decend the staircase? OR exit scene where you ascend to the outdoors?
