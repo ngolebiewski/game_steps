@@ -84,17 +84,10 @@ export default class MazeGenerator {
 
     return reachable;
   }
+
   // method to cut rooms out of maze, because it will be more fun with chambers of secrets.
   makeRooms(currentLevel) {
-
-    // TO DO: Random sizes for Rooms, make the max size grow as the level gets higher and the stages are bigger with more area.
-
-    // let's start with adding in a 2x3 room somewhere in bounds. then lets randomize it, and make more rooms with more levels, that sort of thing.
-
-
-    //hard code for now. make this more random after testing one box out
-    const boxes = [[2, 3], [3, 4], [6, 6], [10, 10]]
-    const numberRooms = Math.floor(Math.min(currentLevel / 3, boxes.length))
+    const numberRooms = Math.floor(currentLevel / 3)
     console.log('number rooms: ', numberRooms)
 
     // this.maze is a 2d array and we want to skip the 1st and last rows and columns because those are walls.
@@ -122,9 +115,9 @@ export default class MazeGenerator {
       }
     }
 
-
+    // Randomizes room sizes, larger possibilities with increasing level, carves out the rooms
     for (let i = 0; i < numberRooms; i++) {
-      const box = boxes[i]
+      const box = [getRandomIntBetween(2, 2 + numberRooms), getRandomIntBetween(2, 2 + numberRooms)]
       console.log(box)
       const boxOrigin = getBoxUpperLeftCoordinate(box[0], box[1])
       carveBox(boxOrigin, box)

@@ -79,7 +79,9 @@ Want to work from a current version, so it is easier to see what has changed. Wh
 
 ## 07 Monster Time 
 
-This game is boring without an adversary. Let's get some monsters in the maze. More collission detection, health, death state...
+This game is boring without an adversary. Let's get some monsters in the maze. More collision detection, health, death state...
+
+Lets also put in some 
 
 ## GAMEPLAN...
 - IDEA: Make candles be an object to find. Less candles, less light and the view distance radius decreases. Always with a bit of flicker, maybe cool flame particles. Out of light? Search around in the darkness for a few seconds then...GAME OVER! 
@@ -92,3 +94,4 @@ This game is boring without an adversary. Let's get some monsters in the maze. M
 - Room carver -> After level 3 randomly carve out 3x3 or 4x4 or 2x6 chambers/rooms on top of the maze grid.
 - At some level make a MAP feature. that will be a little pop up that can show the maze, or at least the location of the cross, that sort of thing. Very OG Zelda when you get a dungeon map
 - Intro scene where you decend the staircase? OR exit scene where you ascend to the outdoors?
+- Refine movement. Start of with a slow speed and add velocity until the max of the level. That should remedy the moving to fast to make a perpindicular maze run control.
