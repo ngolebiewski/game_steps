@@ -24,8 +24,8 @@ export default class Level {
     if (this.button) this.button.remove();
   }
 
-  update() {
-    if (this.onUpdate) this.onUpdate();
+  update(dt) {
+    if (this.onUpdate) this.onUpdate(dt);
   }
 
   draw() {

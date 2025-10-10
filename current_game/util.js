@@ -41,3 +41,33 @@ export function drawText(
   ctx.textAlign = prev.align;
   ctx.textBaseline = prev.baseline;
 }
+
+export function drawCandleLight(ctx, x, y, radius = 50, intensity = 0.5) {
+  const flicker = 0.7 + Math.random() * 0.6; // 0.7 → 1.3 range
+  const steps = 32; // number of points on the noisy circle
+  const noiseAmount = radius * 0.15; // max deviation from circle
+
+  ctx.save();
+  ctx.beginPath();
+
+  for (let i = 0; i <= steps; i++) {
+    const angle = (i / steps) * Math.PI * 2;
+    const r = radius + (Math.random() - 0.5) * noiseAmount; // add noise
+    const px = x + Math.cos(angle) * r;
+    const py = y + Math.sin(angle) * r;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+
+  ctx.closePath();
+
+  // Radial gradient for smooth fading
+  const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+  grad.addColorStop(0, `rgba(255, 220, 120, ${intensity * flicker})`);
+  grad.addColorStop(0.4, `rgba(255, 160, 50, ${intensity * flicker * 0.6})`);
+  grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.restore();
+}

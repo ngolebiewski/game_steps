@@ -53,6 +53,18 @@ export function playCross() {
   }
 }
 
+export function playCandle() {
+  // C minor melody
+  const notes = [261, 293, 311, 349, 392, 466]; // C, D, D#, F, G, A#
+  const durations = [80, 80, 80, 80, 80, 200];  // last note is long “dooo”
+
+  notes.forEach((freq, i) => {
+    setTimeout(() => {
+      playTone(freq, durations[i], "square", 0.1);
+    }, i * 100); // spacing between notes
+  });
+}
+
 export function playStart() {
   const pentatonicC = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25];
   const duration = 200;

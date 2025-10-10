@@ -18,12 +18,18 @@ class Globals {
     this.cssWidth = window.innerWidth;
     this.cssHeight = window.innerHeight;
 
-    // Game state
+    // Game state (specific to this game)
     this.deathsCollected = 0;
+    this.candlesCollected = 0;
 
     // Sprite / Tile info
     this.TILE_SIZE = 16;
     this.SCALE = 2;
+
+    // Delta Time
+    this.dt = 0
+
+    this.debugMode = true
   }
 
   // --- Derived values (helpers) ---
