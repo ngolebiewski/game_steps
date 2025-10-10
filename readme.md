@@ -77,7 +77,7 @@ Want to work from a current version, so it is easier to see what has changed. Wh
 
 - Moved the Global variables into a Global class, so managed slightly better.
 
-## 07 Rooms + Animated Sprites
+## 07 Rooms + Animated Sprites -- Finally some original art!
 
 Let's add chambers/rooms to the maze for a few larger spaces, that give you more exploration options. Not sure if I like how it looks.
 Also, lets get some animation in with a candle I drew in ASEPRITE.
